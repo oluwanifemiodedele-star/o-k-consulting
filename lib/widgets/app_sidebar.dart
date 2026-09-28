@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+// Labels and icons are matched by index, so change both lists together.
 const List<String> kNavigationItems = [
   'Home',
   'My Businesses',
@@ -21,8 +22,15 @@ const List<IconData> kNavigationIcons = [
   Icons.settings_outlined,
 ];
 
+/// Side navigation with the logo and a list of pages.
+///
+/// It doesn't track the open page itself. The parent passes in
+/// [selectedIndex] and is told about taps through [onSelect].
 class AppSidebar extends StatelessWidget {
+  /// Index of the selected item in [kNavigationItems].
   final int selectedIndex;
+
+  /// Called with the index of the item that was tapped.
   final ValueChanged<int> onSelect;
 
   const AppSidebar({
@@ -94,6 +102,7 @@ class AppSidebar extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             onTap: () {
               onSelect(index);
+              // Close the drawer after a tap when the sidebar is inside one.
               if (Scaffold.of(context).hasDrawer) {
                 Navigator.of(context).pop();
               }

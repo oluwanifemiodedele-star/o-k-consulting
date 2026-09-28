@@ -7,8 +7,13 @@ import '../widgets/stat_card.dart';
 import 'business_detail_screen.dart';
 
 
+/// Home screen. Shows an empty state until a business is added, then a
+/// summary and a list of all businesses.
 class DashboardScreen extends StatelessWidget {
+  /// Adds extra padding on wide screens.
   final bool isDesktop;
+
+  /// Called when the user taps "Add Your First Business".
   final VoidCallback onAddBusiness;
 
   const DashboardScreen({
@@ -20,6 +25,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      // Rebuilds when the store changes.
       child: ListenableBuilder(
         listenable: BusinessStore.instance,
         builder: (context, _) {
@@ -54,6 +60,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Search bar placeholder. It's disabled until search is built.
   Widget _buildTopBar() {
     return Container(
       height: 46,
@@ -148,6 +155,8 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Tapping a card opens the detail screen. Only the id is passed so that
+  // screen always reads the latest data from the store.
   Widget _buildBusinessCard(BuildContext context, Business business) {
     return InkWell(
       borderRadius: BorderRadius.circular(14),

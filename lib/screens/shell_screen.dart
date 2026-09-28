@@ -4,6 +4,7 @@ import '../widgets/app_sidebar.dart';
 import 'add_business_screen.dart';
 import 'dashboard_screen.dart';
 
+/// Main screen. Shows the sidebar next to the current page.
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key});
 
@@ -18,6 +19,7 @@ class _ShellScreenState extends State<ShellScreen> {
 
   void _select(int index) => setState(() => selectedIndex = index);
 
+  // On desktop, show or hide the sidebar. On mobile, open the drawer.
   void _toggleSidebar(bool isDesktop) {
     if (isDesktop) {
       setState(() => sidebarVisible = !sidebarVisible);
@@ -28,6 +30,7 @@ class _ShellScreenState extends State<ShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 900px wide or more counts as desktop.
     final bool isDesktop = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
@@ -80,6 +83,7 @@ class _ShellScreenState extends State<ShellScreen> {
     );
   }
 
+  // Only Home (0) and Add Business (2) are built so far.
   Widget _buildContent(bool isDesktop) {
     switch (selectedIndex) {
       case 0:
@@ -95,7 +99,9 @@ class _ShellScreenState extends State<ShellScreen> {
   }
 }
 
+/// Placeholder shown for sections that haven't been built yet.
 class NotBuiltYetScreen extends StatelessWidget {
+  /// Name of the section, shown as the title.
   final String sectionName;
 
   const NotBuiltYetScreen({super.key, required this.sectionName});

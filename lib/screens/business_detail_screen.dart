@@ -7,6 +7,8 @@ import '../widgets/pipeline_stage_badge.dart';
 import '../widgets/section_card.dart';
 import 'evidence_section.dart';
 
+/// Detail screen for one business. Walks through the pipeline steps in
+/// order, only showing a step once the one before it is done.
 class BusinessDetailScreen extends StatelessWidget {
   final String businessId;
 
@@ -17,11 +19,14 @@ class BusinessDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        // Listens to the store so this screen updates if the business
+        // changes from somewhere else (e.g. an async webhook result).
         child: ListenableBuilder(
           listenable: BusinessStore.instance,
           builder: (context, _) {
             final business = BusinessStore.instance.getById(businessId);
 
+            // Business could have been removed while this screen was open.
             if (business == null) {
               return const Center(
                 child: Text('Business not found.', style: TextStyle(color: AppColors.textSecondary)),
@@ -39,10 +44,13 @@ class BusinessDetailScreen extends StatelessWidget {
                       _buildHeader(context, business),
                       const SizedBox(height: 30),
                       _buildDataCollectionSection(business),
+                      // Nothing to clean until data has been collected.
                       if (business.collectedInfo.isNotEmpty) ...[
                         const SizedBox(height: 20),
                         _buildCleaningSection(business),
                       ],
+                      // Matching and evidence come after cleaning, so both
+                      // are gated on standardizedInfo existing.
                       if (business.standardizedInfo != null) ...[
                         const SizedBox(height: 20),
                         _buildMatchingStub(),
@@ -105,6 +113,8 @@ class BusinessDetailScreen extends StatelessWidget {
     );
   }
 
+  // Order matters: no method picked yet -> picked automatic (dead end) ->
+  // picked manual but nothing submitted -> manual with data submitted.
   Widget _buildDataCollectionSection(Business business) {
     if (business.dataCollectionMethod == null) {
       return _buildDecisionCard(business);
@@ -192,6 +202,7 @@ class BusinessDetailScreen extends StatelessWidget {
     );
   }
 
+  // Shows the raw submitted data as-is; cleaning happens in a later step.
   Widget _buildCollectedInfoCard(Business business) {
     return SectionCard(
       title: 'Collected Data (Raw)',
@@ -209,6 +220,7 @@ class BusinessDetailScreen extends StatelessWidget {
     );
   }
 
+  // Shared row layout, reused for both raw and cleaned data.
   List<Widget> _buildInfoRows(Map<String, String> info) {
     return info.entries
         .map(
@@ -226,6 +238,7 @@ class BusinessDetailScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
+                    // Em dash instead of a blank so an empty field reads as intentional.
                     entry.value.isEmpty ? '—' : entry.value,
                     style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
                   ),
@@ -237,8 +250,7 @@ class BusinessDetailScreen extends StatelessWidget {
         .toList();
   }
 
-  /// "Clean & Standardize Data". Shown once real data has been
-  /// collected.
+  // Shows a button before cleaning has run, and the result after.
   Widget _buildCleaningSection(Business business) {
     if (business.standardizedInfo == null) {
       return SectionCard(
@@ -286,6 +298,7 @@ class BusinessDetailScreen extends StatelessWidget {
     );
   }
 
+  // Placeholder — matching needs at least two data sources.
   Widget _buildMatchingStub() {
     return SectionCard(
       title: 'Match & Connect Information Across Sources',
@@ -305,6 +318,7 @@ class BusinessDetailScreen extends StatelessWidget {
     );
   }
 
+  // Hides itself once nothing is left to flag.
   Widget _buildGapsSection(Business business) {
     if (business.informationGaps.isEmpty) return const SizedBox.shrink();
 
@@ -319,6 +333,8 @@ class BusinessDetailScreen extends StatelessWidget {
   }
 }
 
+// Split out as its own StatefulWidget just so the text controllers have a
+// State to live in and get disposed properly.
 class _RequestInfoForm extends StatefulWidget {
   final String businessId;
 

@@ -1,12 +1,16 @@
 import 'evidence.dart';
 import 'pipeline_stage.dart';
 
+/// How the business's data was collected — automatically from a source,
+/// or typed in manually.
 enum DataCollectionMethod {
   automatic,
   manual,
 }
 
-
+/// Tracks one business as it moves through the pipeline, from initial
+/// details to a finished, monitored profile. Most methods here just move
+/// the business into its next state and update [stage] to match.
 class Business {
   final String id;
   final String name;
@@ -22,12 +26,16 @@ class Business {
 
   Map<String, String> collectedInfo;
 
+  // Stays null until cleanAndStandardizeData() runs, even if collectedInfo
+  // already has data in it.
   Map<String, String>? standardizedInfo;
 
   bool evidenceMarkedUnavailable;
 
   Evidence? evidence;
 
+  // Only set if the analysis request itself fails. A missing analysis
+  // result on its own doesn't mean an error happened.
   String? evidenceAnalysisError;
 
   Business({
@@ -48,27 +56,34 @@ class Business {
         evidence = null,
         evidenceAnalysisError = null;
 
+  /// Sets the data collection method to automatic.
   void chooseAutomaticDataSource() {
     dataCollectionMethod = DataCollectionMethod.automatic;
   }
 
+  /// Sets the data collection method to manual.
   void chooseManualDataSource() {
     dataCollectionMethod = DataCollectionMethod.manual;
   }
 
+  /// Clears the chosen data collection method so the user can pick again.
   void resetDataCollectionMethod() {
     dataCollectionMethod = null;
   }
 
-  /// "Request Information From Business / Stakeholder" -> submitted.
+  /// Saves manually submitted data and moves the business into the data
+  /// retrieval stage. Clears any previous cleaned data since it no longer
+  /// matches.
   void submitRequestedInfo(Map<String, String> info) {
     dataCollectionMethod = DataCollectionMethod.manual;
     collectedInfo = info;
     stage = PipelineStage.dataRetrieval;
-    standardizedInfo = null; // new raw data invalidates any prior cleaning
+    standardizedInfo = null;
   }
 
-  /// "Clean & Standardize Data".
+  /// Trims and normalizes [collectedInfo] into [standardizedInfo], then
+  /// moves the business into the cleaned stage. Does nothing if there's no
+  /// data yet.
   void cleanAndStandardizeData() {
     if (collectedInfo.isEmpty) return;
 
@@ -76,6 +91,8 @@ class Business {
     collectedInfo.forEach((key, rawValue) {
       final trimmed = rawValue.trim();
       switch (key) {
+        // Registration numbers get typed inconsistently, so strip spaces
+        // and force uppercase to keep them comparable later.
         case 'Registration Number':
           cleaned[key] = trimmed.toUpperCase().replaceAll(RegExp(r'\s+'), '');
           break;
@@ -91,6 +108,7 @@ class Business {
     stage = PipelineStage.dataCleaned;
   }
 
+  /// Marks that no supporting evidence exists for this business.
   void markEvidenceUnavailable() {
     evidenceMarkedUnavailable = true;
     evidence = null;
@@ -98,26 +116,32 @@ class Business {
     stage = PipelineStage.evidenceValidation;
   }
 
+  /// Undoes [markEvidenceUnavailable] if the user decides evidence can be
+  /// found after all.
   void reconsiderEvidence() {
     evidenceMarkedUnavailable = false;
   }
 
+  /// Saves newly submitted evidence and clears any previous error.
   void submitEvidence(Evidence newEvidence) {
     evidenceMarkedUnavailable = false;
     evidence = newEvidence;
     evidenceAnalysisError = null;
   }
 
+  /// Attaches a completed analysis result to the current evidence.
   void setEvidenceAnalysis(EvidenceAnalysis analysis) {
     evidence?.analysis = analysis;
     evidenceAnalysisError = null;
     stage = PipelineStage.evidenceValidation;
   }
 
+  /// Records that the analysis request failed, with a message to show.
   void setEvidenceAnalysisError(String message) {
     evidenceAnalysisError = message;
   }
 
+  /// Removes the current evidence so different evidence can be submitted.
   void clearEvidence() {
     evidence = null;
     evidenceAnalysisError = null;
@@ -132,6 +156,7 @@ class Business {
     }
 
     if (dataCollectionMethod == DataCollectionMethod.automatic) {
+      // Automatic collection isn't built yet, so this will always be a gap.
       gaps.add('Automated data source connection not yet built');
       return gaps;
     }
@@ -146,6 +171,8 @@ class Business {
       return gaps;
     }
 
+    // Only one data source exists right now, so this will always show
+    // until multi-source matching is built.
     gaps.add('Only one data source connected — nothing to match across sources yet');
 
     if (evidenceMarkedUnavailable) {
@@ -166,6 +193,8 @@ class Business {
   }
 }
 
+/// Capitalizes the first letter of each word. Doesn't handle names like
+/// "McDonald" or "O'Brien" correctly.
 String _toTitleCase(String input) {
   if (input.isEmpty) return input;
   return input

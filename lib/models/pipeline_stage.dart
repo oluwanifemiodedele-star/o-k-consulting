@@ -1,3 +1,5 @@
+/// The stages a business record moves through, in order, as its profile
+/// gets built out.
 enum PipelineStage {
   identified,
   detailsCollected,
@@ -9,6 +11,7 @@ enum PipelineStage {
 }
 
 extension PipelineStageX on PipelineStage {
+  /// The label shown in the UI for this stage.
   String get label {
     switch (this) {
       case PipelineStage.identified:
@@ -28,8 +31,9 @@ extension PipelineStageX on PipelineStage {
     }
   }
 
-
-   bool get isBuilt =>
+  // True for every stage before the profile is finished. Once it reaches
+  // profileBuilt or monitoring, we're maintaining it, not building it.
+  bool get isBuilt =>
       this == PipelineStage.identified ||
       this == PipelineStage.detailsCollected ||
       this == PipelineStage.dataRetrieval ||

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+/// Small tile that shows one number with an icon and a label.
 class StatCard extends StatelessWidget {
+  /// Label shown above the value.
   final String title;
+
+  /// The number (or text) to show in large type.
   final String value;
+
+  /// Icon shown on the left.
   final IconData icon;
 
   const StatCard({
@@ -34,6 +40,7 @@ class StatCard extends StatelessWidget {
             child: Icon(icon, color: AppColors.brightBlue, size: 19),
           ),
           const SizedBox(width: 12),
+          // Expanded so a long title doesn't overflow in a narrow card.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

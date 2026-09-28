@@ -4,7 +4,9 @@ import '../services/business_store.dart';
 import '../theme/app_colors.dart';
 
 
+/// Form screen for adding a new business.
 class AddBusinessScreen extends StatefulWidget {
+  /// Called after the business is saved.
   final VoidCallback onBusinessCreated;
 
   const AddBusinessScreen({super.key, required this.onBusinessCreated});
@@ -33,6 +35,7 @@ class _AddBusinessScreenState extends State<AddBusinessScreen> {
   void _createBusiness() {
     if (!_formKey.currentState!.validate()) return;
 
+    // Years is optional, so a blank or invalid value becomes 0.
     final int years = int.tryParse(yearsOperatingController.text) ?? 0;
 
     final business = Business(
@@ -166,6 +169,7 @@ class _AddBusinessScreenState extends State<AddBusinessScreen> {
     );
   }
 
+  /// Shows two fields side by side on wide screens and stacked on narrow ones.
   Widget _responsiveRow(Widget left, Widget right) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -183,6 +187,7 @@ class _AddBusinessScreenState extends State<AddBusinessScreen> {
     );
   }
 
+  /// A text input with a label above it.
   Widget _field({
     required String label,
     required String hint,
@@ -207,6 +212,7 @@ class _AddBusinessScreenState extends State<AddBusinessScreen> {
     );
   }
 
+  /// A dropdown-style field. Tapping it opens a bottom sheet to pick from [items].
   Widget _picker({
     required String label,
     required String hint,
@@ -249,6 +255,7 @@ class _AddBusinessScreenState extends State<AddBusinessScreen> {
     );
   }
 
+  /// The bottom sheet for a picker. Tapping an option selects it and closes the sheet.
   void _showPickerSheet({
     required String label,
     required List<String> items,

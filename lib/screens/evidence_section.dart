@@ -7,6 +7,8 @@ import '../services/evidence_analysis_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/section_card.dart';
 
+/// Handles the evidence flow for a business: asking if evidence exists,
+/// the submission form, analysis in progress, and the final result.
 class EvidenceSection extends StatefulWidget {
   final String businessId;
 
@@ -50,6 +52,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
       imageName: _pickedImageName,
     );
 
+    // Save the evidence first so it isn't lost if the analysis call fails.
     store.submitEvidence(widget.businessId, evidence);
     setState(() => _isAnalyzing = true);
 
@@ -60,6 +63,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
       store.setEvidenceAnalysisError(widget.businessId, e.toString());
     }
 
+    // The user might have navigated away while this was loading.
     if (mounted) {
       setState(() {
         _isAnalyzing = false;
@@ -104,6 +108,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// Asks whether the user has evidence to submit.
   Widget _buildDecisionCard() {
     return SectionCard(
       title: 'Is Supporting Evidence Available?',
@@ -150,6 +155,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// Shown when the user said there's no evidence.
   Widget _buildUnverifiedCard() {
     return SectionCard(
       title: 'Marked as Unverified',
@@ -179,6 +185,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// The form for submitting a description and/or a photo.
   Widget _buildForm() {
     return SectionCard(
       title: 'Submit Evidence',
@@ -233,6 +240,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// Shown while waiting for the analysis result.
   Widget _buildAnalyzingCard() {
     return SectionCard(
       title: 'Validate Evidence',
@@ -250,6 +258,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// Shown when the analysis request failed (not the same as a negative result).
   Widget _buildErrorCard(String message) {
     return SectionCard(
       title: 'Evidence Validation Failed',
@@ -281,6 +290,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
     );
   }
 
+  /// Shows the analysis result — supportive or conflicting.
   Widget _buildResultCard(EvidenceAnalysis analysis) {
     final bool agrees = analysis.agrees;
     return SectionCard(
@@ -307,6 +317,7 @@ class _EvidenceSectionState extends State<EvidenceSection> {
             analysis.reasoning,
             style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
           ),
+          // Only let them retry if the evidence conflicted.
           if (!agrees) ...[
             const SizedBox(height: 16),
             OutlinedButton(

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+/// A bordered card with a bold title and any content below it.
 class SectionCard extends StatelessWidget {
+  /// Heading shown at the top of the card.
   final String title;
+
+  /// Content shown under the title.
   final Widget child;
 
   const SectionCard({super.key, required this.title, required this.child});
